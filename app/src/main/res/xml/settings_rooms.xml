@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Индексы номеров">
+        <EditTextPreference
+            android:defaultValue="100"
+            android:inputType="numberDecimal"
+            android:digits="0123456789"
+            android:key="room_starting_index"
+            android:summary="Укажите индекс номера, с которого начнется отсчет"
+            android:title="Индекс стартового гостиничного номера" />
+        <EditTextPreference
+            android:defaultValue="50"
+            android:inputType="numberDecimal"
+            android:digits="0123456789"
+            android:key="room_quantity"
+            android:title="Количество номеров" />
+    </PreferenceCategory>
+</PreferenceScreen>

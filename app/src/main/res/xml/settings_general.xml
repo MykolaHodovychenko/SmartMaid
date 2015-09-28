@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference android:title="Закрыть настройки"
+        android:key="button_back"/>
+    <Preference android:title="Закрыть приложение"
+        android:key="button_quit"/>
+</PreferenceScreen>

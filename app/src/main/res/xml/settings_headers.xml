@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    <header android:title="Общие"
+        android:fragment="com.isosystems.smartmaid.settings.FragmentSettingsGeneral"/>
+    <header android:title="Соединение"
+        android:fragment="com.isosystems.smartmaid.settings.FragmentSettingsConnection"/>
+    <header android:title="Номера"
+        android:fragment="com.isosystems.smartmaid.settings.FragmentRooms"/>
+    <header android:title="Оповещения"
+        android:fragment="com.isosystems.smartmaid.settings.FragmentNotifications"/>
+
+
+</preference-headers>

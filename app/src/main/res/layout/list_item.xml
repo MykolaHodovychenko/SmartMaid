@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#1452d4c4"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="New Text"
+            android:id="@+id/room_text"
+            android:textIsSelectable="false"
+            android:textAlignment="gravity"
+            android:gravity="center_vertical"
+            android:textSize="25dip"
+            android:layout_weight="1"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@android:color/darker_gray" />
+
+        <View
+            android:layout_width="64dip"
+            android:layout_height="32dip"
+            android:id="@+id/dnd_indicator"
+            android:background="#00d404"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@android:color/darker_gray" />
+
+        <View
+            android:layout_width="64dip"
+            android:layout_height="32dip"
+            android:id="@+id/maid_indicator"
+            android:background="#00d404"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@android:color/darker_gray" />
+
+        <View
+            android:layout_width="64dip"
+            android:layout_height="32dip"
+            android:id="@+id/clean_indicator"
+            android:background="#00d404"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@android:color/darker_gray" />
+
+        <View
+            android:layout_width="64dip"
+            android:layout_height="32dip"
+            android:id="@+id/wash_indicator"
+            android:background="#00d404"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@android:color/darker_gray" />
+
+        <View
+            android:layout_width="64dip"
+            android:layout_height="32dip"
+            android:id="@+id/minibar_indicator"
+            android:background="#00d404"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

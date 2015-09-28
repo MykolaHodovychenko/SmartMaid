@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Звуковой сигнал">
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="use_sound_signal"
+            android:title="Использовать звуковой сигнал" />
+        <ListPreference
+            android:title="Выбор сигнала"
+            android:summary="Выберите один из нескольких сигналов"
+            android:key="signals_list"
+            android:dependency="use_sound_signal"
+            android:defaultValue="2"
+            android:entries="@array/sounds_array"
+            android:entryValues="@array/sounds_values" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Подсветка строки комнаты">
+    </PreferenceCategory>
+</PreferenceScreen>

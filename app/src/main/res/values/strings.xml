@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">SmartMaid</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string-array name="sounds_array">
+        <item>Ding</item>
+        <item>No way</item>
+        <item>Job done</item>
+        <item>Get outta here</item>
+        <item>Suppressed</item>
+        <item>Croack</item>
+    </string-array>
+
+    <string-array name="sounds_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    <string-array name="connections_array">
+        <item>Wi-Fi</item>
+        <item>USB</item>
+    </string-array>
+
+    <string-array name="connections_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+
+</resources>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Подключение">
+        <ListPreference
+            android:title="Выбор типа подключения"
+            android:summary="Выберите подключение по wi-fi или по usb"
+            android:key="connection_type"
+            android:defaultValue="0"
+            android:entries="@array/connections_array"
+            android:entryValues="@array/connections_values" />
+    </PreferenceCategory>
+<!-- WI-FI -->
+    <PreferenceCategory android:title="Настройки Wi-Fi подключения">
+        <EditTextPreference
+            android:defaultValue="YAM-AP-00000002"
+            android:inputType="text"
+            android:key="wifi_name"
+            android:summary="Устройство будет искать сеть с указанным именем"
+            android:title="Название wi-fi сети" />
+        <EditTextPreference
+            android:defaultValue="12345678"
+            android:key="wifi_password"
+            android:summary="Устройство будет использовать указанный пароль для подключения к сети"
+            android:title="Пароль wi-fi сети" />
+        <EditTextPreference
+            android:defaultValue="10000"
+            android:digits="0123456789"
+            android:inputType="numberDecimal"
+            android:key="wifi_reconnect_timeout"
+            android:summary="Устройство будет искать сеть с указанным интервалом (не рекомендуется устанавливать меньше 8000)"
+            android:title="Тайм-аут поиска wi-fi сети (мсек)" />
+        <EditTextPreference
+            android:defaultValue="192.168.4.1"
+            android:digits="0123456789."
+            android:inputType="numberDecimal"
+            android:key="socket_ip"
+            android:summary="Устройство будет подключаться к указанному IP в wi-fi сети"
+            android:title="IP сокета" />
+        <EditTextPreference
+            android:defaultValue="12345"
+            android:digits="0123456789"
+            android:inputType="numberDecimal"
+            android:key="socket_port"
+            android:summary="Устройство будет подключаться к сокету по указанному порту"
+            android:title="Порт сокета" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="socket_timeout_endless"
+            android:summary="При выделении этого пункта, программа будет ждать прихода сообщений бесконечно"
+            android:title="Бесконечный тайм-аут" />
+        <EditTextPreference
+            android:defaultValue="10000"
+            android:digits="0123456789"
+            android:inputType="numberDecimal"
+            android:key="socket_timeout"
+            android:summary="Если через указанное время не появятся новые данные, то программа считает что сокет закрыт (значение должно быть больше, чем период отправки значений из контроллера)"
+            android:title="Тайм-аут сокета (мсек)" />
+        <EditTextPreference
+            android:defaultValue="DisplayNumber:1"
+            android:key="socket_message"
+            android:summary="Устройство передаст указанное сообщение сразу после подключения к сокету"
+            android:title="Приветственное сообщение" />
+    </PreferenceCategory>
+<!-- USB -->
+    <PreferenceCategory android:title="Настройки USB-подключения">
+        <EditTextPreference
+            android:defaultValue="2000"
+            android:digits="0123456789"
+            android:inputType="numberSigned"
+            android:key="buffer_clean_timeout_value"
+            android:summary="Очистка буфера после N мсек. после прихода последнего сообщения"
+            android:title="Период очистки буфера (мсек.)" >
+        </EditTextPreference>
+    </PreferenceCategory>
+
+</PreferenceScreen>
