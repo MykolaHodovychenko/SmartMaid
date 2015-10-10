@@ -14,34 +14,26 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.isosystems.smartmaid.connection.ConnectionManager;
+import com.isosystems.smartmaid.settings.FragmentSettingsLog;
 import com.isosystems.smartmaid.settings.SettingsActivity;
-import com.isosystems.smartmaid.utils.FlipMenuButton;
 import com.isosystems.smartmaid.utils.RoomsManager;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
     ImageView mWifiIcon;
     ImageView mPowerIcon;
 
+    // Состояние соединения с контроллером
+    Boolean isConnected = false;
+
     MyApplication mApplication;
 
     @Override
@@ -91,14 +86,16 @@ public class MainActivity extends AppCompatActivity {
         setPreferences();
 
         // Создаем менеджер подключений
-        mConnectionManager = new ConnectionManager(mMode, MainActivity.this, wifi_name,password,socket_endless_timeout,socket_ip,socket_port,socket_greetings_message);
+        mConnectionManager = new ConnectionManager(mMode, MainActivity.this, wifi_name, password, socket_endless_timeout, socket_ip, socket_port, socket_greetings_message);
         if (mConnectionManager.getConnectionMode() == ConnectionManager.ConnectionMode.USB) {
+            FragmentSettingsLog.updateLog("Режим подключения: USB", getApplicationContext());
             mConnectionManager.startUSBReceiveService();
+        } else {
+            FragmentSettingsLog.updateLog("Режим подключения: WIFI", getApplicationContext());
         }
     }
 
-    public void handleUncaughtException (Thread thread, Throwable e)
-    {
+    public void handleUncaughtException(Thread thread, Throwable e) {
         e.printStackTrace(); // not all Android versions will print the stack trace automatically
 
         try {
@@ -185,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
         // Установка полного экрана
         setFullScreen();
 
-        mRoomsManager = new RoomsManager(getWindow().getDecorView().getRootView(),MainActivity.this,mStartingRoomNumber,mNumberOfRooms);
+        mRoomsManager = new RoomsManager(getWindow().getDecorView().getRootView(), MainActivity.this, mStartingRoomNumber, mNumberOfRooms);
 
         // Кнопка "Настройки"
         mSettingsButton = (ImageButton) findViewById(R.id.settings_button);
@@ -264,6 +261,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        setPowerIcon(isSupplyEnabled());
+        setConnectionIcon(isConnected);
     }
 
     /**
@@ -344,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        socket_endless_timeout = prefs.getBoolean("socket_timeout_endless",true);
+        socket_endless_timeout = prefs.getBoolean("socket_timeout_endless", true);
 
         socket_greetings_message = prefs.getString("socket_message", "DisplayNumber:1");
 
@@ -402,6 +401,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Кнопка "Настройки"
+     *
      * @return
      */
     View.OnClickListener mSettingsButtonListener() {
@@ -472,9 +472,13 @@ public class MainActivity extends AppCompatActivity {
                 setPowerIcon(isSupplyEnabled());
             } else if (intent.getAction().equals(ConnectionManager.WIFI_CONNECTED) ||
                     intent.getAction().equals(ConnectionManager.USB_CONNECTED)) {
+                FragmentSettingsLog.updateLog("Сеть подключена, меняем значок на зеленый",getApplicationContext());
+                isConnected = true;
                 setConnectionIcon(true);
             } else if (intent.getAction().equals(ConnectionManager.WIFI_DISCONNECTED) ||
                     intent.getAction().equals(ConnectionManager.USB_DISCONNECTED)) {
+                FragmentSettingsLog.updateLog("Сеть отключена, меняем значок на крансный",getApplicationContext());
+                isConnected = false;
                 setConnectionIcon(false);
             }
         }
@@ -486,7 +490,7 @@ public class MainActivity extends AppCompatActivity {
         int plugged = 0;
         plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
 
-        boolean result = (plugged != 0 && plugged!=-1);
+        boolean result = (plugged != 0 && plugged != -1);
         return result;
     }
 
@@ -506,7 +510,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setPowerIcon (boolean state) {
+    private void setPowerIcon(boolean state) {
         if (state) {
             mPowerIcon.setImageResource(R.drawable.power_on);
         } else {

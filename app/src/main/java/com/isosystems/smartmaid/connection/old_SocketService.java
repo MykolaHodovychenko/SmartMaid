@@ -23,14 +23,11 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.Charset;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SocketService extends Service {
+public class old_SocketService extends Service {
 
     PrintWriter out;
     InputStream in;
@@ -69,8 +66,8 @@ public class SocketService extends Service {
     }
 
     public class LocalBinder extends Binder {
-        public SocketService getService() {
-            return SocketService.this;
+        public old_SocketService getService() {
+            return old_SocketService.this;
         }
     }
 
@@ -295,7 +292,6 @@ public class SocketService extends Service {
 
                                 FragmentSettingsLog.updateLog("Отправка приветственного сообщения: " + mSocketGreetingsMessage, getApplicationContext());
                             } else {
-                                FragmentSettingsLog.updateLog("Ошибка при отправке приветственного сообщения: " + mSocketGreetingsMessage, getApplicationContext());
                             }
 
                             Intent i = new Intent();
@@ -305,16 +301,14 @@ public class SocketService extends Service {
                             SocketReceive receive = new SocketReceive();
                             AsyncTask<Void, String, Void> receiveTask = receive.execute();
 
-                            SocketCheckTask socketCheck = new SocketCheckTask();
-                            AsyncTask<Void, Void, Void> socketCheckTask = socketCheck.execute();
-
-                            while (receiveTask.getStatus().equals(AsyncTask.Status.RUNNING) || socketCheckTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
+                            while (receiveTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
                             }
 
                             out.close();
                             in.close();
 
                             FragmentSettingsLog.updateLog("Закрытие каналов на передачу и отправку", getApplicationContext());
+
                         } catch (Exception e) {
                             FragmentSettingsLog.updateLog("Исключение при откытии(закрытии) каналов и отпрвке приветственного сообщения" + mSocketGreetingsMessage, getApplicationContext());
                             e.printStackTrace();
@@ -331,6 +325,7 @@ public class SocketService extends Service {
         }
     }
 
+
     /**
      * Пытаемся закрыть сокет
      */
@@ -343,34 +338,6 @@ public class SocketService extends Service {
             e.printStackTrace();
         }
         socket = null;
-    }
-
-
-    class SocketCheckTask extends AsyncTask<Void, Void, Void> {
-        protected void onProgressUpdate(Void... params) {
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                Thread.sleep(5000);
-                Calendar c = Calendar.getInstance();
-                int seconds = c.get(Calendar.SECOND);
-                if (out != null && !out.checkError()) {
-                    out.print(seconds);
-                    out.flush();
-                } else {
-                    throw new Exception();
-                }
-            } catch (Exception e) {
-                Intent i = new Intent();
-                FragmentSettingsLog.updateLog("Канал на отправку испорчен, дальше должна быть попытка реконнекта", getApplicationContext());
-                i.setAction(ConnectionManager.WIFI_DISCONNECTED);
-                getApplicationContext().sendBroadcast(i);
-                e.printStackTrace();
-            }
-            return null;
-        }
     }
 
     /**
@@ -413,9 +380,6 @@ public class SocketService extends Service {
                         publishProgress(mReceiveMessage);
                     }
                 }
-
-                FragmentSettingsLog.updateLog("Пришло байт: " + bytesRead, getApplicationContext());
-
             } catch (Exception e) {
                 Intent i = new Intent();
                 FragmentSettingsLog.updateLog("Исключение при приеме сообщения", getApplicationContext());

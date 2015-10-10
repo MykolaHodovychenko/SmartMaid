@@ -12,6 +12,11 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
+
+import com.isosystems.smartmaid.Globals;
+import com.isosystems.smartmaid.settings.FragmentSettingsLog;
+import com.isosystems.smartmaid.utils.Notifications;
 
 /**
  * Менеджер соединения приложения с wifi/usb
@@ -22,13 +27,14 @@ public class ConnectionManager {
 
     public static final String USB_CONNECTED = "smart.connection.usb.connected";
     public static final String USB_DISCONNECTED = "smart.connection.usb.disconnected";
-
+    public static final String OLD_USB_DISCONNECTED = "smart.connection.usb.disconnected";
     public static final String WIFI_CONNECTED = "smart.connection.wifi.connected";
     public static final String WIFI_DISCONNECTED = "smart.connection.wifi.disconnected";
 
     public static final String ERROR_MESSAGE_SHORT = "smart.connection.error.message.short";
     public static final String ERROR_MESSAGE_UNKNOWN_TYPE = "smart.connection.error.message.unknown.type";
 
+    public static final String MESSAGE_SEND = "smart.connection.message.send";
     public static final String MESSAGE_ALARM = "smart.connection.message.alarm";
     public static final String MESSAGE_VALUE = "smart.connection.message.value";
     public static final String MESSAGE_FORMSCREEN = "smart.connection.message.formscreen";
@@ -41,6 +47,8 @@ public class ConnectionManager {
     private String socket_ip;
     private int socket_port;
     private String socket_greetings_message;
+
+    private boolean isConnected;
 
     SocketService mBoundService = null;
     boolean mIsBound = false;
@@ -63,7 +71,7 @@ public class ConnectionManager {
         ConnectionManager.connectionMode = mode;
         this.activity = activity;
         mReceiver = new WifiReceiver();
-        if (ConnectionManager.connectionMode == ConnectionMode.WIFI) setupReceiver();
+        setupReceiver();
     }
 
     /**
@@ -73,6 +81,10 @@ public class ConnectionManager {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(WIFI_CONNECTED);
+        filter.addAction(WIFI_DISCONNECTED);
+        filter.addAction(USB_CONNECTED);
+        filter.addAction(USB_DISCONNECTED);
 
         activity.registerReceiver(mReceiver, filter);
     }
@@ -91,6 +103,7 @@ public class ConnectionManager {
                 .getDefaultSharedPreferences(context.getApplicationContext());
 
         if (prefs.getString("connection_type", "0").equals("1")) {
+
             Intent i = new Intent(context, USBReceiveService.class);
             context.startService(i);
         }
@@ -106,21 +119,53 @@ public class ConnectionManager {
         }
     }
 
-    /**
-     * Отсылка сообщения контроллеру.
-     *
-     * @param context
-     * @param message
-     */
-    public void sendMessage(Context context, String message) {
-        if (this.connectionMode == ConnectionMode.USB) {
-            Intent i = new Intent(context.getApplicationContext(),
-                    USBSendService.class);
-            i.putExtra("message", message);
-            context.startService(i);
-        } else if (this.connectionMode == ConnectionMode.WIFI) {
-            // TODO: отсылка через wifi
+
+    public Boolean sendMessage(Context context, int index, int value) {
+        String messageToSend = processMessage(index, value);
+
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(context.getApplicationContext());
+
+        boolean blockOutput = prefs.getBoolean("block_output_without_connection", true);
+
+        if (blockOutput) {
+            if (isConnected) {
+                if (connectionMode == connectionMode.USB) {
+                    Intent i = new Intent(activity.getApplicationContext(),
+                            USBSendService.class);
+                    i.putExtra("message", messageToSend);
+                    activity.getApplicationContext().startService(i);
+                } else if (connectionMode == connectionMode.WIFI) {
+                    if (mBoundService != null) {
+                        mBoundService.sendMessage(messageToSend);
+                    }
+                }
+                return true;
+            } else {
+                Notifications.showErrorCrouton(activity, Globals.NOTIFICATION_NO_CONNECTION);
+                return false;
+            }
+        } else {
+            if (connectionMode == connectionMode.USB) {
+                Intent i = new Intent(activity.getApplicationContext(),
+                        USBSendService.class);
+                i.putExtra("message", messageToSend);
+                activity.getApplicationContext().startService(i);
+            } else if (connectionMode == connectionMode.WIFI) {
+                if (mBoundService != null) {
+                    mBoundService.sendMessage(messageToSend);
+                }
+            }
+            return true;
         }
+    }
+
+    private String processMessage(int index, int value) {
+        return String.valueOf(index + 100) + "," + String.valueOf(value);
+    }
+
+    public Boolean isConnected() {
+        return this.isConnected;
     }
 
     /**
@@ -148,7 +193,12 @@ public class ConnectionManager {
         i.putExtra("socket_endless_timeout", socket_endless_timeout);
         i.putExtra("socket_greetings_message", socket_greetings_message);
 
-        activity.bindService(i, mConnection, Context.BIND_AUTO_CREATE);
+        try {
+            activity.bindService(i, mConnection, Context.BIND_AUTO_CREATE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(activity, "cm_dobind error", Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
@@ -167,8 +217,13 @@ public class ConnectionManager {
     ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mBoundService = ((SocketService.LocalBinder) service).getService();
-            mIsBound = true;
+            try {
+                mBoundService = ((SocketService.LocalBinder) service).getService();
+                mIsBound = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(activity, "cm_sc_onsc error", Toast.LENGTH_LONG).show();
+            }
         }
 
         @Override
@@ -208,18 +263,37 @@ public class ConnectionManager {
                 if (state == NetworkInfo.DetailedState.CONNECTED) {
                     if (!mWifiManager.getConnectionInfo().getSSID().equals(wifiName)
                             && !mWifiManager.getConnectionInfo().getSSID().equals("\"" + wifiName + "\"")) {
-                        if (mBoundService != null) {
-                            mBoundService.reconnectToWifi();
+                        try {
+                            FragmentSettingsLog.updateLog("Подключено к сети " + mWifiManager.getConnectionInfo().getSSID() +
+                                    ", сеть неправильная, делаем реконнент", context);
+                            if (mBoundService != null) {
+                                mBoundService.reconnectToWifi();
+                            }
+                        } catch (Exception e) {
+                            FragmentSettingsLog.updateLog("Исключение при попытке реконнекта, текущая сеть " +
+                                    mWifiManager.getConnectionInfo().getSSID(), context);
+                            e.printStackTrace();
+                            Toast.makeText(activity, "cm_br_reconnect error", Toast.LENGTH_LONG).show();
                         }
                     }
                 }
             } else if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                 int status = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
                 if (status == WifiManager.WIFI_STATE_ENABLED) {
+                    FragmentSettingsLog.updateLog("WIFI модуль включен ", context);
                     doBindService();
                 } else if (status == WifiManager.WIFI_STATE_DISABLED) {
+                    FragmentSettingsLog.updateLog("WIFI модуль выключен ", context);
                     doUnbindService();
                 }
+            } else if (intent.getAction().equals(ConnectionManager.WIFI_CONNECTED) ||
+                    intent.getAction().equals(ConnectionManager.USB_CONNECTED)) {
+                isConnected = true;
+            } else if (intent.getAction().equals(ConnectionManager.WIFI_DISCONNECTED) ||
+                    intent.getAction().equals(ConnectionManager.USB_DISCONNECTED)) {
+                isConnected = false;
+            } else if (intent.getAction().equals(ConnectionManager.MESSAGE_SEND)) {
+                // TODO: отправка сообщения
             }
         } //onReceive
     } // WifiReceiver

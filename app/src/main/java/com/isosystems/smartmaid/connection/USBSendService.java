@@ -10,6 +10,8 @@ import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 
+import com.isosystems.smartmaid.settings.FragmentSettingsLog;
+
 import java.util.HashMap;
 
 public class USBSendService extends IntentService {
@@ -122,6 +124,8 @@ public class USBSendService extends IntentService {
 
 			int result = -1;
 			try {
+				FragmentSettingsLog.updateLog("Выслано: " + msg, getApplicationContext());
+
 				result = usbConnection.bulkTransfer(usbEndpointOut,
 						msg.getBytes(), msg.getBytes().length, 0);
 				wasSend = true;

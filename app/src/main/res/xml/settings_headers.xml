@@ -9,6 +9,8 @@
         android:fragment="com.isosystems.smartmaid.settings.FragmentRooms"/>
     <header android:title="Оповещения"
         android:fragment="com.isosystems.smartmaid.settings.FragmentNotifications"/>
+    <header android:title="Журнал"
+        android:fragment="com.isosystems.smartmaid.settings.FragmentSettingsLog"/>
 
 
 </preference-headers>
