@@ -274,6 +274,7 @@ public class SocketService extends Service {
 
                     try {
                         socket = new Socket(mSocketIp, mSocketPort);
+                        socket.setKeepAlive(true);
 
                         if (!mSocketEndlessTimeout) {
                             socket.setSoTimeout(mSocketTimeout);
@@ -296,6 +297,7 @@ public class SocketService extends Service {
                                 FragmentSettingsLog.updateLog("Отправка приветственного сообщения: " + mSocketGreetingsMessage, getApplicationContext());
                             } else {
                                 FragmentSettingsLog.updateLog("Ошибка при отправке приветственного сообщения: " + mSocketGreetingsMessage, getApplicationContext());
+                                throw new Exception();
                             }
 
                             Intent i = new Intent();
@@ -305,10 +307,20 @@ public class SocketService extends Service {
                             SocketReceive receive = new SocketReceive();
                             AsyncTask<Void, String, Void> receiveTask = receive.execute();
 
-                            SocketCheckTask socketCheck = new SocketCheckTask();
-                            AsyncTask<Void, Void, Void> socketCheckTask = socketCheck.execute();
+//                            SocketCheckTask socketCheck = new SocketCheckTask();
+//                            AsyncTask<Void, Void, Void> socketCheckTask = socketCheck.execute();
 
-                            while (receiveTask.getStatus().equals(AsyncTask.Status.RUNNING) || socketCheckTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
+                            while (receiveTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
+                                Thread.sleep(5000);
+                                Calendar c = Calendar.getInstance();
+                                int seconds = c.get(Calendar.SECOND);
+                                if (out!=null && !out.checkError() && socket.isConnected() && !socket.isInputShutdown() && !socket.isOutputShutdown() && !socket.isClosed() && socket.isBound()) {
+                                    out.print(seconds);
+                                    out.flush();
+                                    FragmentSettingsLog.updateLog("Отправлено контрольное сообщение", getApplicationContext());
+                                } else {
+                                    throw new Exception();
+                                }
                             }
 
                             out.close();
@@ -348,6 +360,7 @@ public class SocketService extends Service {
 
     class SocketCheckTask extends AsyncTask<Void, Void, Void> {
         protected void onProgressUpdate(Void... params) {
+
         }
 
         @Override
@@ -359,6 +372,7 @@ public class SocketService extends Service {
                 if (out != null && !out.checkError()) {
                     out.print(seconds);
                     out.flush();
+                    publishProgress();
                 } else {
                     throw new Exception();
                 }
