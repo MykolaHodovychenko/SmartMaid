@@ -4,6 +4,7 @@ import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +64,12 @@ public class ListAdapter extends BaseAdapter {
 
         TextView room_text = (TextView) v.findViewById(R.id.room_text);
         room_text.setText(String.valueOf(rooms.get(position).room_number));
+        if (rooms.get(position).room_number > 999) {
+            room_text.setTextSize(TypedValue.COMPLEX_UNIT_DIP,20);
+        } else {
+            room_text.setTextSize(TypedValue.COMPLEX_UNIT_DIP,25);
+        }
+
 
         View dnd = (View) v.findViewById(R.id.dnd_indicator);
         View maid = (View) v.findViewById(R.id.maid_indicator);

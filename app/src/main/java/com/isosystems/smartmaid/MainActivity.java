@@ -351,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
         boolean enable_sound = prefs.getBoolean("use_sound_signal", false);
         //((MyApplication)getApplicationContext()).soundMessages.setEnable_sound(enable_sound);
 
+
         // Стартовый гостиничный номер
         s = prefs.getString("room_starting_index", "100");
         try {

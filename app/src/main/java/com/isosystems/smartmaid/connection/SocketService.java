@@ -307,9 +307,6 @@ public class SocketService extends Service {
                             SocketReceive receive = new SocketReceive();
                             AsyncTask<Void, String, Void> receiveTask = receive.execute();
 
-//                            SocketCheckTask socketCheck = new SocketCheckTask();
-//                            AsyncTask<Void, Void, Void> socketCheckTask = socketCheck.execute();
-
                             while (receiveTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
                                 Thread.sleep(5000);
                                 Calendar c = Calendar.getInstance();

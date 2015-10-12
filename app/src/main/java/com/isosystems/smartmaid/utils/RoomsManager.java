@@ -79,15 +79,15 @@ public class RoomsManager implements View.OnClickListener {
 
         this.mContext = context;
 
-        // Создается массив с номерами
-        roomsArray = new ArrayList<Room>();
-        // Инициализация массива с номерами
-        populateRoomsArray();
-
         // Установка стартового номера
         this.mStartingRoomNumber = starting_number;
         // Установка количества номеров
         this.mNumberOfRooms = numbers_count;
+
+        // Создается массив с номерами
+        roomsArray = new ArrayList<Room>();
+        // Инициализация массива с номерами
+        populateRoomsArray();
 
         // Инициализация и установка слушателей для кнопок сортировки
         setSortButtons();
